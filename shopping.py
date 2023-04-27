@@ -1,5 +1,6 @@
 import csv
 import sys
+from time import strptime
 
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
@@ -8,7 +9,6 @@ TEST_SIZE = 0.4
 
 
 def main():
-
     # Check command-line arguments
     if len(sys.argv) != 2:
         sys.exit("Usage: python shopping.py data")
@@ -33,35 +33,66 @@ def main():
 
 def load_data(filename):
     """
-    Load shopping data from a CSV file `filename` and convert into a list of
-    evidence lists and a list of labels. Return a tuple (evidence, labels).
-
-    evidence should be a list of lists, where each list contains the
-    following values, in order:
-        - Administrative, an integer
-        - Administrative_Duration, a floating point number
-        - Informational, an integer
-        - Informational_Duration, a floating point number
-        - ProductRelated, an integer
-        - ProductRelated_Duration, a floating point number
-        - BounceRates, a floating point number
-        - ExitRates, a floating point number
-        - PageValues, a floating point number
-        - SpecialDay, a floating point number
-        - Month, an index from 0 (January) to 11 (December)
-        - OperatingSystems, an integer
-        - Browser, an integer
-        - Region, an integer
-        - TrafficType, an integer
-        - VisitorType, an integer 0 (not returning) or 1 (returning)
-        - Weekend, an integer 0 (if false) or 1 (if true)
-
-    labels should be the corresponding list of labels, where each label
-    is 1 if Revenue is true, and 0 otherwise.
+    Loads data from a .csv file called <filename> and extracts evidence
+    and labels from the file to be returned as a tuple.
     """
 
-    
-    raise NotImplementedError
+    def get_date_int(date_str: str) -> int:
+        """Converts date shorthand to int"""
+        return strptime(date_str, '%b').month
+
+    bool_dict = {
+        'TRUE': 1,
+        'FALSE': 0,
+    }
+
+    visitor_type_dict = {
+        'Returning_Visitor': 1,
+        'New_Visitor': 0,
+        'Other': 0,
+    }
+
+    evidence = []
+    labels = []
+
+    with open(filename, 'r') as csv_file:
+        # opt to use dictionary csv_reader as opposed to numerical indexed reader
+        csv_reader = csv.DictReader(filename)
+        for row in csv_reader:
+            # append current label
+            labels.append(bool_dict[csv_reader['Revenue']])
+
+            # opt to use list literal as opposed to appending
+            curr_evidence = [
+                int(row['Administrative']),
+                float(row['Administrative_Duration']),
+                int(row['Informational']),
+                float(row['Informational_Duration']),
+                int(row['ProductRelated']),
+                float(row['ProductRelated_Duration']),
+                float(row['BounceRates']),
+                float(row['ExitRates']),
+                float(row['PageValues']),
+                float(row['SpecialDay']),
+
+                # call our nested function from earlier
+                get_date_int(row['Month']),
+
+                int(row['OperatingSystems']),
+                int(row['Browser']),
+                int(row['Region']),
+                int(row['TrafficType']),
+                visitor_type_dict[row['VisitorType']],
+                bool_dict[row['Weekend']]
+            ]
+
+            # convert date type to int
+            evidence.append(curr_evidence)
+
+    if len(evidence) != len(labels):
+        sys.exit('There was an issue reading the csv, mismatched evidence and label list lengths.\n')
+
+    return evidence, labels
 
 
 def train_model(evidence, labels):
