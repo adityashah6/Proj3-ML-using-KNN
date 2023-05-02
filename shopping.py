@@ -39,7 +39,13 @@ def load_data(filename):
 
     def get_date_int(date_str: str) -> int:
         """Converts date shorthand to int"""
-        return strptime(date_str, '%b').month
+        if date_str == 'June':
+            date_str = 'Jun'
+
+        return strptime(date_str.strip(), '%b').tm_mon
+
+    months_dict = {'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'June': 5, 'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9,
+                   'Nov': 10, 'Dec': 11}
 
     bool_dict = {
         'TRUE': 1,
@@ -57,10 +63,11 @@ def load_data(filename):
 
     with open(filename, 'r') as csv_file:
         # opt to use dictionary csv_reader as opposed to numerical indexed reader
-        csv_reader = csv.DictReader(filename)
+        csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
             # append current label
-            labels.append(bool_dict[csv_reader['Revenue']])
+
+            labels.append(bool_dict[row['Revenue']])
 
             # opt to use list literal as opposed to appending
             curr_evidence = [
@@ -74,10 +81,7 @@ def load_data(filename):
                 float(row['ExitRates']),
                 float(row['PageValues']),
                 float(row['SpecialDay']),
-
-                # call our nested function from earlier
                 get_date_int(row['Month']),
-
                 int(row['OperatingSystems']),
                 int(row['Browser']),
                 int(row['Region']),
@@ -124,16 +128,16 @@ def evaluate(labels, predictions):
     positives = 0
     negatives = 0
 
-    for label, prediction in zip(labels, prediction):
+    for label, prediction in zip(labels, predictions):
         if prediction == 1 and label == 1:
             positives = positives + 1
         elif prediction == 0 and label == 0:
             negatives = negatives + 1
-    
-    sensitivity = positives/len(labels)
-    specificity = negatives/len(labels)
-    
-    return (sensitivity, specificity)
+
+    sensitivity = positives / len(labels)
+    specificity = negatives / len(labels)
+
+    return sensitivity, specificity
 
 
 if __name__ == "__main__":
