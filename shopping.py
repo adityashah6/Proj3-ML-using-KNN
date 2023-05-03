@@ -1,3 +1,6 @@
+# Group names:
+# Daniel Cazarez
+
 import csv
 import sys
 from time import strptime
@@ -39,13 +42,7 @@ def load_data(filename):
 
     def get_date_int(date_str: str) -> int:
         """Converts date shorthand to int"""
-        if date_str == 'June':
-            date_str = 'Jun'
-
-        return strptime(date_str.strip(), '%b').tm_mon
-
-    months_dict = {'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'June': 5, 'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9,
-                   'Nov': 10, 'Dec': 11}
+        return strptime(date_str[:3].strip(), '%b').tm_mon
 
     bool_dict = {
         'TRUE': 1,
@@ -101,7 +98,7 @@ def load_data(filename):
 
 def train_model(evidence, labels):
     """
-    Given a list of evidence lists and a list of labels, return a
+    Given a list of evidence lists and a list of labels, this returns a
     fitted k-nearest neighbor model (k=1) trained on the data.
     """
     neigh = KNeighborsClassifier(n_neighbors=1)
@@ -113,29 +110,21 @@ def train_model(evidence, labels):
 def evaluate(labels, predictions):
     """
     Given a list of actual labels and a list of predicted labels,
-    return a tuple (sensitivity, specificity).
-
-    Assume each label is either a 1 (positive) or 0 (negative).
-
-    `sensitivity` should be a floating-point value from 0 to 1
-    representing the "true positive rate": the proportion of
-    actual positive labels that were accurately identified.
-
-    `specificity` should be a floating-point value from 0 to 1
-    representing the "true negative rate": the proportion of
-    actual negative labels that were accurately identified.
+    this returns a tuple (sensitivity, specificity), where sensitivity
+    represents the true positive rate and specificity represents the true
+    negative rate
     """
-    positives = 0
-    negatives = 0
+    true_positives = 0
+    true_negatives = 0
 
     for label, prediction in zip(labels, predictions):
         if prediction == 1 and label == 1:
-            positives = positives + 1
+            true_positives += 1
         elif prediction == 0 and label == 0:
-            negatives = negatives + 1
+            true_negatives += 1
 
-    sensitivity = positives / len(labels)
-    specificity = negatives / len(labels)
+    sensitivity = true_positives / len(labels)
+    specificity = true_negatives / len(labels)
 
     return sensitivity, specificity
 
