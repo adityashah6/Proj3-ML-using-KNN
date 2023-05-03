@@ -94,7 +94,8 @@ def load_data(filename):
             evidence.append(curr_evidence)
 
     if len(evidence) != len(labels):
-        sys.exit('There was an issue reading the csv, mismatched evidence and label list lengths.\n')
+        sys.exit(
+            'There was an issue reading the csv, mismatched evidence and label list lengths.\n')
 
     return evidence, labels
 
@@ -117,17 +118,23 @@ def evaluate(labels, predictions):
     represents the true positive rate and specificity represents the true
     negative rate
     """
+
+    # get positives and negatives from labels
+    positives = labels.count(1)
+    negatives = labels.count(0)
+
     true_positives = 0
     true_negatives = 0
 
+    # true positives and negatives only occur when pred and label match
     for label, prediction in zip(labels, predictions):
         if prediction == 1 and label == 1:
             true_positives += 1
         elif prediction == 0 and label == 0:
             true_negatives += 1
 
-    sensitivity = true_positives / len(labels)
-    specificity = true_negatives / len(labels)
+    sensitivity = true_positives / positives
+    specificity = true_negatives / negatives
 
     return sensitivity, specificity
 
