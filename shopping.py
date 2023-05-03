@@ -1,5 +1,8 @@
 # Group names:
 # Daniel Cazarez
+# Lea Albano
+# Jennah Kanan
+# Aditya Shah
 
 import csv
 import sys
